@@ -4,6 +4,7 @@ import helmet from 'helmet'
 import { config } from './config.js'
 import { requireAuth } from './middleware/auth.js'
 import { startTelegramBot } from './services/telegram.js'
+import authRoutes from './routes/auth.js'
 import chatRoutes from './routes/chat.js'
 import transactionsRoutes from './routes/transactions.js'
 import walletsRoutes from './routes/wallets.js'
@@ -20,6 +21,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'paypulse-api', version: '0.2.0' })
 })
 
+app.use('/api/auth', authRoutes)
 app.use('/api/chat', requireAuth, chatRoutes)
 app.use('/api/transactions', requireAuth, transactionsRoutes)
 app.use('/api/wallets', requireAuth, walletsRoutes)

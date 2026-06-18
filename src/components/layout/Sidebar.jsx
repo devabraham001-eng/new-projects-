@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -6,6 +6,7 @@ import {
   BookOpen, Settings, ChevronDown, Link2, Send, FileText,
   MoreHorizontal, LogOut, Zap
 } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
 
 const platformNav = [
   { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
@@ -32,7 +33,17 @@ const projects = [
 
 export default function Sidebar({ activePage, onNavigate, collapsed }) {
   const [expandedChat, setExpandedChat] = useState(false)
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
+  const userEmail = user?.email || ''
+  const initials = userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U'
+
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/')
+  }
 
   const handleNavClick = (item) => {
     if (item.children) {
@@ -176,18 +187,18 @@ export default function Sidebar({ activePage, onNavigate, collapsed }) {
               : 'w-full gap-3 px-3 py-2.5 text-sm hover:bg-surface-hover'
           }`}
         >
-          {collapsed ? 'JD' : (
+          {collapsed ? initials : (
             <>
-              <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-xs font-bold text-accent flex-shrink-0">JD</div>
+              <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-xs font-bold text-accent flex-shrink-0">{initials}</div>
               <div className="flex-1 text-left min-w-0">
-                <div className="text-sm font-medium text-text-primary truncate">John Doe</div>
-                <div className="text-[10px] text-muted font-mono truncate">john@example.com</div>
+                <div className="text-sm font-medium text-text-primary truncate">{userName}</div>
+                <div className="text-[10px] text-muted font-mono truncate">{userEmail}</div>
               </div>
             </>
           )}
         </button>
         <button
-          onClick={() => navigate('/')}
+          onClick={handleSignOut}
           className={`flex items-center rounded-lg transition-all duration-150 ${
             collapsed
               ? 'text-muted hover:text-text-primary'

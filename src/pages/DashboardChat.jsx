@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   Zap, Send, Check, Lock, Copy, X, Wallet, User,
-  Phone, Eye, EyeOff, Sparkles
+  Phone, Eye, EyeOff, Sparkles, Loader
 } from 'lucide-react'
 import { Badge } from '../components/ui/badge'
 import { Card } from '../components/ui/card'
 import { useToast } from '../components/ui/toast'
+import { api } from '../services/api'
 
 const INITIAL_BOT_MSG = {
   type: 'bot',
@@ -39,6 +40,7 @@ export default function DashboardChat() {
   const [showOtp, setShowOtp] = useState(false)
   const [otp, setOtp] = useState('')
   const [phone, setPhone] = useState('')
+  const [confirming, setConfirming] = useState(false)
   const messagesEndRef = useRef(null)
   const { toast } = useToast()
 
@@ -53,7 +55,7 @@ export default function DashboardChat() {
 
   const addMsg = (msg) => setMessages(prev => [...prev, msg])
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = input.trim()
     if (!text) return
 
@@ -61,17 +63,56 @@ export default function DashboardChat() {
     setInput('')
     setIsTyping(true)
 
-    setTimeout(() => {
+    try {
+      const data = await api.post('/chat/parse', { text })
       setIsTyping(false)
-      const ref = `PP-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`
-      const txId = crypto.randomUUID()
+
+      if (data.action === 'balance') {
+        addMsg({
+          type: 'bot',
+          content: (
+            <div>
+              <p className="text-text-primary">Your balance is <strong className="text-accent">\u20A6{data.balance.toLocaleString()}</strong></p>
+            </div>
+          ),
+        })
+        return
+      }
+
+      if (data.action === 'history') {
+        const txs = data.transactions || []
+        if (txs.length === 0) {
+          addMsg({ type: 'bot', content: <p className="text-text-primary">No transactions yet.</p> })
+          return
+        }
+        addMsg({
+          type: 'bot',
+          content: (
+            <div>
+              <p className="text-text-primary font-semibold mb-2">Recent Transactions</p>
+              {txs.slice(0, 5).map(tx => (
+                <div key={tx.id} className="flex justify-between py-1.5 border-b border-border/50 text-sm">
+                  <span className="text-muted truncate mr-2">{tx.recipient}</span>
+                  <span className={`font-medium flex-shrink-0 ${tx.type === 'credit' ? 'text-success' : ''}`}>
+                    {tx.type === 'credit' ? '+' : '-'}\u20A6{Number(tx.amount).toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ),
+        })
+        return
+      }
+
+      const inv = data.invoice
+      const tx = data.transaction
 
       addMsg({
         type: 'bot',
         content: (
           <div>
             <Badge variant="success" size="sm" dot className="mb-2">Account Verified</Badge>
-            <p className="mb-3 text-text-primary">Recipient: <strong>Ola Ogunleye</strong></p>
+            <p className="mb-3 text-text-primary">Recipient: <strong>{inv.recipient}</strong></p>
 
             <Card className="relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-accent/20 via-accent/40 to-accent/20 rounded-t-xl" />
@@ -80,26 +121,26 @@ export default function DashboardChat() {
                   <span className="text-[10px] font-mono text-muted uppercase tracking-wider flex items-center gap-1">
                     <Wallet size={10} /> Transfer Invoice
                   </span>
-                  <span className="text-xs font-mono text-accent">{ref}</span>
+                  <span className="text-xs font-mono text-accent">{inv.reference}</span>
                 </div>
                 <div className="flex justify-between items-center py-2.5 border-b border-border">
                   <span className="text-sm text-muted">Amount</span>
-                  <span className="text-2xl font-bold text-accent tracking-tight">₦2,000.00</span>
+                  <span className="text-2xl font-bold text-accent tracking-tight">\u20A6{Number(inv.amount).toLocaleString()}.00</span>
                 </div>
                 <div className="flex justify-between items-center py-2.5 border-b border-border text-sm">
                   <span className="text-muted">Recipient</span>
-                  <span className="text-text-primary">Ola Ogunleye</span>
+                  <span className="text-text-primary">{inv.recipient}</span>
                 </div>
                 <div className="flex justify-between items-center py-2.5 border-b border-border text-sm">
                   <span className="text-muted">Account</span>
-                  <code className="text-xs font-mono text-accent">7044879145</code>
+                  <code className="text-xs font-mono text-accent">{inv.account}</code>
                 </div>
                 <div className="flex justify-between items-center py-2.5 text-sm">
                   <span className="text-muted">Bank</span>
-                  <span className="text-text-primary">OPay</span>
+                  <span className="text-text-primary">{inv.bank || 'OPay'}</span>
                 </div>
                 <button
-                  onClick={() => openWebview({ txId, ref, amount: '₦2,000.00', recipient: 'Ola Ogunleye' })}
+                  onClick={() => openWebview({ txId: tx.id, ref: inv.reference, amount: `\u20A6${Number(inv.amount).toLocaleString()}.00`, recipient: inv.recipient })}
                   className="mt-3 w-full py-2.5 rounded-lg bg-accent text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-colors"
                 >
                   <Lock size={14} /> Pay with OPay
@@ -110,7 +151,13 @@ export default function DashboardChat() {
           </div>
         ),
       })
-    }, 1200)
+    } catch (err) {
+      setIsTyping(false)
+      addMsg({
+        type: 'bot',
+        content: <p className="text-error">Sorry, I couldn't process that. Try "transfer 2000 to 7044879145"</p>,
+      })
+    }
   }
 
   const handleCopy = (text) => {
@@ -125,9 +172,13 @@ export default function DashboardChat() {
     setOtp('')
   }
 
-  const confirmPayment = () => {
-    setShowWebview(false)
-    setTimeout(() => {
+  const confirmPayment = async () => {
+    if (!webviewTx?.ref) return
+    setConfirming(true)
+    try {
+      await api.post('/chat/confirm', { reference: webviewTx.ref, otp })
+
+      setShowWebview(false)
       setSuccessData({
         amount: webviewTx.amount,
         recipient: webviewTx.recipient,
@@ -160,7 +211,11 @@ export default function DashboardChat() {
           </div>
         ),
       })
-    }, 500)
+    } catch (err) {
+      toast(err.message || 'Payment failed')
+    } finally {
+      setConfirming(false)
+    }
   }
 
   return (
@@ -228,7 +283,6 @@ export default function DashboardChat() {
         </div>
       </div>
 
-      {/* Webview Overlay */}
       {showWebview && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" role="dialog" aria-modal="true" aria-label="Secure payment confirmation">
           <div className="w-full max-w-sm bg-surface-card border border-border rounded-2xl overflow-hidden shadow-2xl animate-fade-in-up">
@@ -289,10 +343,11 @@ export default function DashboardChat() {
 
                 <button
                   onClick={confirmPayment}
-                  disabled={!phone || otp.length < 4}
+                  disabled={!phone || otp.length < 4 || confirming}
                   className="w-full py-3 rounded-lg bg-accent text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Lock size={14} /> Confirm Secure Payment
+                  {confirming ? <Loader size={14} className="animate-spin" /> : <Lock size={14} />}
+                  {' '}Confirm Secure Payment
                 </button>
 
                 <p className="text-[10px] text-muted text-center font-mono">
@@ -304,7 +359,6 @@ export default function DashboardChat() {
         </div>
       )}
 
-      {/* Success Modal */}
       {showSuccess && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" role="dialog" aria-modal="true" aria-label="Transfer successful">
           <div className="w-full max-w-sm bg-surface-card border border-border rounded-2xl p-8 text-center shadow-2xl animate-fade-in-up">

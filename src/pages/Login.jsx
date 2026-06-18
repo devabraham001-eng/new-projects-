@@ -1,24 +1,44 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Zap, Eye, EyeOff, Mail, Lock, Sparkles } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Zap, Eye, EyeOff, Mail, Lock, Sparkles, Loader } from 'lucide-react'
 import { Button } from '../components/ui/button'
+import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../components/ui/toast'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [mode, setMode] = useState('login')
+  const [submitting, setSubmitting] = useState(false)
+  const { signIn, signUp } = useAuth()
   const navigate = useNavigate()
+  const { toast } = useToast()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    navigate('/dashboard')
+    setSubmitting(true)
+    try {
+      if (mode === 'login') {
+        await signIn(email, password)
+        toast('Signed in successfully')
+      } else {
+        await signUp(email, password, name)
+        toast('Account created! Check your email to confirm.')
+        setMode('login')
+      }
+    } catch (err) {
+      toast(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-surface-secondary flex items-center justify-center p-5">
       <div className="w-full max-w-md">
-          <div className="bg-surface-card border border-border rounded-2xl p-6 sm:p-10 shadow-lg shadow-black/5">
+        <div className="bg-surface-card border border-border rounded-2xl p-6 sm:p-10 shadow-lg shadow-black/5">
           <div className="flex items-center justify-center gap-2.5 mb-8">
             <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
               <Zap size={20} className="text-white" />
@@ -36,11 +56,27 @@ export default function Login() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {mode === 'register' && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono text-muted uppercase tracking-wider" htmlFor="name">Full Name</label>
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-surface text-text-primary text-sm placeholder:text-muted/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
+                  required
+                />
+              </div>
+            )}
+
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-muted uppercase tracking-wider">Email</label>
+              <label className="text-xs font-mono text-muted uppercase tracking-wider" htmlFor="email">Email</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input
+                  id="email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
@@ -52,10 +88,11 @@ export default function Login() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-muted uppercase tracking-wider">Password</label>
+              <label className="text-xs font-mono text-muted uppercase tracking-wider" htmlFor="password">Password</label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input
+                  id="password"
                   type={showPw ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
@@ -75,8 +112,10 @@ export default function Login() {
               </div>
             </div>
 
-            <Button variant="primary" className="w-full" size="lg">
-              {mode === 'login' ? (
+            <Button variant="primary" className="w-full" size="lg" disabled={submitting}>
+              {submitting ? (
+                <Loader size={16} className="animate-spin" />
+              ) : mode === 'login' ? (
                 <><Sparkles size={16} /> Sign In</>
               ) : (
                 'Create Account'

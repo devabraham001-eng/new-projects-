@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, MessageCircle, Wallet, ArrowLeftRight, Settings, User
+  LayoutDashboard, MessageCircle, Wallet, ArrowLeftRight, Settings, User, LogOut
 } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../ui/toast'
+import { api } from '../../services/api'
 import Sidebar from './Sidebar'
 import Breadcrumb from './Breadcrumb'
 import DashboardHome from '../../pages/DashboardHome'
@@ -49,6 +52,7 @@ const breadcrumbMap = {
 export default function DashboardLayout() {
   const [activePage, setActivePage] = useState('home')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -63,6 +67,11 @@ export default function DashboardLayout() {
 
   const handleNavigate = (page) => {
     setActivePage(page)
+  }
+
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/')
   }
 
   const pages = {
@@ -127,46 +136,62 @@ export default function DashboardLayout() {
           <User size={20} aria-hidden="true" />
           Profile
         </button>
+        <button
+          onClick={handleSignOut}
+          className="flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-muted transition-colors"
+        >
+          <LogOut size={20} aria-hidden="true" />
+          Sign Out
+        </button>
       </nav>
     </div>
   )
 }
 
 function DashboardProfile() {
+  const { user } = useAuth()
+  const [name, setName] = useState(user?.user_metadata?.full_name || user?.email?.split('@')[0] || '')
+  const [saving, setSaving] = useState(false)
+  const { toast } = useToast()
+  const userEmail = user?.email || ''
+  const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U'
+  const createdDate = user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : ''
+
+  const handleSave = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    try {
+      await api.put('/profile', { name })
+      toast('Profile updated')
+    } catch {
+      toast('Failed to update profile')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="flex-1 p-6 sm:p-8 max-w-3xl overflow-y-auto">
       <div className="bg-surface-card border border-border rounded-2xl p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 mb-8">
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-accent/10 border-2 border-accent flex items-center justify-center text-xl sm:text-2xl font-bold text-accent flex-shrink-0" aria-hidden="true">
-            JD
+            {initials}
           </div>
           <div>
-            <h2 className="text-lg sm:text-xl font-semibold text-text-primary">John Doe</h2>
-            <p className="text-sm text-muted">john@example.com</p>
-            <p className="text-xs text-muted mt-1 font-mono">Member since June 2026</p>
+            <h2 className="text-lg sm:text-xl font-semibold text-text-primary">{name}</h2>
+            <p className="text-sm text-muted">{userEmail}</p>
+            {createdDate && <p className="text-xs text-muted mt-1 font-mono">Member since {createdDate}</p>}
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
-          {[
-            { label: 'Transactions', value: '24' },
-            { label: 'Volume', value: '\u20A6142K' },
-            { label: 'Wallets', value: '2' },
-          ].map((s, i) => (
-            <div key={i} className="bg-surface-secondary rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-accent">{s.value}</div>
-              <div className="text-xs text-muted mt-1">{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        <form className="space-y-4 max-w-md">
+        <form onSubmit={handleSave} className="space-y-4 max-w-md">
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted uppercase tracking-wider" htmlFor="profile-name">Full Name</label>
             <input
               id="profile-name"
               type="text"
-              defaultValue="John Doe"
+              value={name}
+              onChange={e => setName(e.target.value)}
               className="w-full px-4 py-2.5 rounded-lg border border-border bg-surface text-text-primary text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
             />
           </div>
@@ -175,12 +200,13 @@ function DashboardProfile() {
             <input
               id="profile-email"
               type="email"
-              defaultValue="john@example.com"
-              className="w-full px-4 py-2.5 rounded-lg border border-border bg-surface text-text-primary text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
+              value={userEmail}
+              disabled
+              className="w-full px-4 py-2.5 rounded-lg border border-border bg-surface text-text-primary text-sm opacity-60 cursor-not-allowed"
             />
           </div>
-          <button className="px-6 py-2.5 rounded-full bg-accent text-white font-semibold text-sm hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all">
-            Save Changes
+          <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-full bg-accent text-white font-semibold text-sm hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all disabled:opacity-50">
+            {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
       </div>

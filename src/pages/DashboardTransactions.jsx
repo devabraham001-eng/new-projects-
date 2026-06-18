@@ -1,16 +1,9 @@
-import { useState } from 'react'
-import { RefreshCw, ArrowLeftRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { RefreshCw, ArrowLeftRight, Loader } from 'lucide-react'
 import { Card } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
-
-const MOCK_TXS = [
-  { ref: 'PP-A4F2-8D3E', amount: 50000, type: 'credit', recipient: 'Ola Ogunleye', status: 'SUCCESSFUL', date: '2026-06-17' },
-  { ref: 'PP-7C1B-3E9A', amount: 2000, type: 'debit', recipient: 'Adekunle Gold', status: 'SUCCESSFUL', date: '2026-06-16' },
-  { ref: 'PP-9D0E-5F7C', amount: 15000, type: 'debit', recipient: 'Chioma Okafor', status: 'PENDING', date: '2026-06-15' },
-  { ref: 'PP-3B8A-1D4F', amount: 8000, type: 'debit', recipient: 'Emeka Nwosu', status: 'FAILED', date: '2026-06-14' },
-  { ref: 'PP-6E2C-9A1B', amount: 25000, type: 'credit', recipient: 'Fatima Bello', status: 'SUCCESSFUL', date: '2026-06-13' },
-]
+import { api } from '../services/api'
 
 const statusConfig = {
   SUCCESSFUL: { variant: 'success', dot: true },
@@ -20,8 +13,23 @@ const statusConfig = {
 
 export default function DashboardTransactions() {
   const [filter, setFilter] = useState('all')
+  const [txs, setTxs] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const filtered = filter === 'all' ? MOCK_TXS : MOCK_TXS.filter(t => t.status === filter.toUpperCase())
+  const fetchTxs = async () => {
+    setLoading(true)
+    try {
+      const params = filter === 'all' ? '' : `?status=${filter}`
+      const data = await api.get(`/transactions${params}`)
+      setTxs(data.transactions || [])
+    } catch {
+      setTxs([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchTxs() }, [filter])
 
   return (
     <div className="flex-1 p-6 sm:p-8 overflow-y-auto">
@@ -42,13 +50,18 @@ export default function DashboardTransactions() {
             </button>
           ))}
         </div>
-        <Button variant="ghost" size="sm">
-          <RefreshCw size={14} /> Refresh
+        <Button variant="ghost" size="sm" onClick={fetchTxs} disabled={loading}>
+          {loading ? <Loader size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+          {' '}Refresh
         </Button>
       </div>
 
       <Card className="overflow-hidden">
-        {filtered.length > 0 ? (
+        {loading ? (
+          <div className="animate-pulse p-6 space-y-4">
+            {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-8 bg-surface-secondary rounded" />)}
+          </div>
+        ) : txs.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -61,21 +74,23 @@ export default function DashboardTransactions() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((tx, i) => (
-                  <tr key={i} className="border-b border-border/50 hover:bg-accent/5 transition-colors">
+                {txs.map((tx, i) => (
+                  <tr key={tx.id || i} className="border-b border-border/50 hover:bg-accent/5 transition-colors">
                     <td className="px-5 py-4">
-                      <code className="text-xs font-mono text-accent">{tx.ref}</code>
+                      <code className="text-xs font-mono text-accent">{tx.reference}</code>
                     </td>
                     <td className={`px-5 py-4 font-medium text-text-primary ${tx.type === 'credit' ? 'text-success' : ''}`}>
-                      {tx.type === 'credit' ? '+' : '-'}₦{tx.amount.toLocaleString()}
+                      {tx.type === 'credit' ? '+' : '-'}\u20A6{Number(tx.amount).toLocaleString()}
                     </td>
                     <td className="px-5 py-4 text-muted">{tx.recipient}</td>
                     <td className="px-5 py-4">
-                      <Badge variant={statusConfig[tx.status].variant} size="md" dot>
+                      <Badge variant={statusConfig[tx.status]?.variant || 'warning'} size="md" dot>
                         {tx.status}
                       </Badge>
                     </td>
-                    <td className="px-5 py-4 text-muted text-xs">{tx.date}</td>
+                    <td className="px-5 py-4 text-muted text-xs">
+                      {new Date(tx.created_at).toLocaleDateString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>

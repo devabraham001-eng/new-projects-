@@ -1,13 +1,7 @@
+import { useState, useEffect } from 'react'
 import { TrendingUp, Wallet, ArrowLeftRight, ArrowUpRight } from 'lucide-react'
 import { Badge } from '../components/ui/badge'
-
-const MOCK_TXS = [
-  { ref: 'PP-A4F2-8D3E', amount: 50000, type: 'credit', recipient: 'Ola Ogunleye', status: 'SUCCESSFUL', date: '2026-06-17' },
-  { ref: 'PP-7C1B-3E9A', amount: 2000, type: 'debit', recipient: 'Adekunle Gold', status: 'SUCCESSFUL', date: '2026-06-16' },
-  { ref: 'PP-9D0E-5F7C', amount: 15000, type: 'debit', recipient: 'Chioma Okafor', status: 'PENDING', date: '2026-06-15' },
-  { ref: 'PP-3B8A-1D4F', amount: 8000, type: 'debit', recipient: 'Emeka Nwosu', status: 'FAILED', date: '2026-06-14' },
-  { ref: 'PP-6E2C-9A1B', amount: 25000, type: 'credit', recipient: 'Fatima Bello', status: 'SUCCESSFUL', date: '2026-06-13' },
-]
+import { api } from '../services/api'
 
 const statusConfig = {
   SUCCESSFUL: { variant: 'success', dot: true },
@@ -16,21 +10,46 @@ const statusConfig = {
 }
 
 export default function DashboardHome({ onNavigate }) {
-  const totalBalance = MOCK_TXS.reduce((sum, tx) =>
-    tx.type === 'credit' ? sum + tx.amount : sum - tx.amount, 0
-  )
-  const todayTxs = MOCK_TXS.filter(tx => tx.date === '2026-06-17').length
+  const [stats, setStats] = useState(null)
+  const [txs, setTxs] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const stats = [
-    { label: 'Total Balance', value: `\u20A6${totalBalance.toLocaleString()}`, change: '+12%', changeLabel: 'from last month', icon: Wallet },
-    { label: 'Transactions Today', value: todayTxs.toString(), change: '+8%', changeLabel: 'from yesterday', icon: ArrowLeftRight },
-    { label: 'Active Wallets', value: '2', change: '', changeLabel: 'Linked accounts', icon: Wallet },
-  ]
+  useEffect(() => {
+    Promise.all([
+      api.get('/transactions/stats'),
+      api.get('/transactions?limit=5'),
+    ]).then(([statsData, txData]) => {
+      setStats(statsData)
+      setTxs(txData.transactions || [])
+    }).catch(() => {
+      setStats({ totalBalance: 0, transactionsToday: 0, activeWallets: 0 })
+      setTxs([])
+    }).finally(() => setLoading(false))
+  }, [])
+
+  const statCards = stats ? [
+    { label: 'Total Balance', value: `\u20A6${(stats.totalBalance || 0).toLocaleString()}`, change: '', changeLabel: 'Real-time balance', icon: Wallet },
+    { label: 'Transactions Today', value: String(stats.transactionsToday || 0), change: '', changeLabel: 'today', icon: ArrowLeftRight },
+    { label: 'Active Wallets', value: String(stats.activeWallets || 0), change: '', changeLabel: 'Linked accounts', icon: Wallet },
+  ] : []
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-6 sm:p-8 overflow-y-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-surface-card border border-border rounded-[20px] p-5 sm:p-6 animate-pulse h-[140px]" />
+          ))}
+        </div>
+        <div className="mt-6 bg-surface-card border border-border rounded-[20px] animate-pulse h-[300px]" />
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 p-6 sm:p-8 overflow-y-auto">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-        {stats.map((stat, i) => {
+        {statCards.map((stat, i) => {
           const Icon = stat.icon
           return (
             <div
@@ -45,12 +64,6 @@ export default function DashboardHome({ onNavigate }) {
               </div>
               <div className="text-2xl font-bold text-text-primary mb-1">{stat.value}</div>
               <div className="flex items-center gap-1 text-xs">
-                {stat.change && (
-                  <>
-                    <TrendingUp size={12} className="text-success" />
-                    <span className="text-success font-medium">{stat.change}</span>
-                  </>
-                )}
                 <span className="text-muted">{stat.changeLabel}</span>
               </div>
             </div>
@@ -70,7 +83,11 @@ export default function DashboardHome({ onNavigate }) {
             </button>
           </div>
           <div className="divide-y divide-border/50">
-            {MOCK_TXS.map((tx, i) => {
+            {txs.length === 0 ? (
+              <div className="px-5 sm:px-6 py-8 text-center text-sm text-muted">
+                No transactions yet. Start by sending a payment in Chat.
+              </div>
+            ) : txs.map((tx, i) => {
               const isCredit = tx.type === 'credit'
               return (
                 <div key={i} className="flex items-center justify-between px-5 sm:px-6 py-3.5 hover:bg-accent/5 transition-colors">
@@ -82,14 +99,14 @@ export default function DashboardHome({ onNavigate }) {
                     </div>
                     <div className="min-w-0">
                       <div className="text-sm font-medium text-text-primary truncate">{tx.recipient}</div>
-                      <code className="text-[10px] font-mono text-muted">{tx.ref}</code>
+                      <code className="text-[10px] font-mono text-muted">{tx.reference}</code>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0 ml-3">
                     <span className={`text-sm font-medium ${isCredit ? 'text-success' : 'text-text-primary'}`}>
-                      {isCredit ? '+' : '-'}\u20A6{tx.amount.toLocaleString()}
+                      {isCredit ? '+' : '-'}\u20A6{Number(tx.amount).toLocaleString()}
                     </span>
-                    <Badge variant={statusConfig[tx.status].variant} size="sm" dot>
+                    <Badge variant={statusConfig[tx.status]?.variant || 'warning'} size="sm" dot>
                       {tx.status}
                     </Badge>
                   </div>

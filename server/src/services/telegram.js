@@ -16,8 +16,7 @@ export function startTelegramBot() {
     return
   }
 
-  bot = new TelegramBot(config.telegramBotToken, { polling: true })
-  console.log('[Telegram] Bot started (polling)')
+  bot = new TelegramBot(config.telegramBotToken, { polling: false })
 
   bot.on('polling_error', (err) => {
     if (err.code === 'ETELEGRAM' && err.message.includes('409')) {
@@ -26,6 +25,9 @@ export function startTelegramBot() {
       console.error('[Telegram] Polling error:', err.message)
     }
   })
+
+  bot.startPolling()
+  console.log('[Telegram] Bot started (polling)')
 
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id

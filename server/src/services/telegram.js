@@ -11,8 +11,21 @@ export function startTelegramBot() {
     return
   }
 
+  if (config.telegramEnabled === false) {
+    console.log('[Telegram] Disabled via TELEGRAM_ENABLED env var')
+    return
+  }
+
   bot = new TelegramBot(config.telegramBotToken, { polling: true })
   console.log('[Telegram] Bot started (polling)')
+
+  bot.on('polling_error', (err) => {
+    if (err.code === 'ETELEGRAM' && err.message.includes('409')) {
+      console.log('[Telegram] Another bot instance is running — continuing without bot')
+    } else {
+      console.error('[Telegram] Polling error:', err.message)
+    }
+  })
 
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id

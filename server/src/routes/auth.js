@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { createClient } from '@supabase/supabase-js'
+import ws from 'ws'
 import { config } from '../config.js'
 import { supabase } from '../lib/supabase.js'
 
@@ -7,6 +8,7 @@ const router = Router()
 
 const anonClient = createClient(config.supabaseUrl, config.supabaseAnonKey, {
   auth: { persistSession: false },
+  realtime: { transport: ws },
 })
 
 router.post('/register', async (req, res) => {

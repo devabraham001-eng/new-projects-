@@ -11,6 +11,16 @@ const anonClient = createClient(config.supabaseUrl, config.supabaseAnonKey, {
   realtime: { transport: ws },
 })
 
+router.get('/debug', (req, res) => {
+  res.json({
+    hasUrl: !!config.supabaseUrl,
+    urlPrefix: config.supabaseUrl ? config.supabaseUrl.slice(0, 20) + '...' : null,
+    hasAnonKey: !!config.supabaseAnonKey,
+    anonKeyPrefix: config.supabaseAnonKey ? config.supabaseAnonKey.slice(0, 10) + '...' : null,
+    hasServiceKey: !!config.supabaseServiceKey,
+  })
+})
+
 router.post('/register', async (req, res) => {
   try {
     const { email, password, name } = req.body

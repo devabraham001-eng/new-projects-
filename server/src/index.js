@@ -33,6 +33,17 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'paypulse-api', version: '0.2.0' })
 })
 
+app.get('/debug/env', (req, res) => {
+  res.json({
+    supabaseUrl: !!config.supabaseUrl,
+    supabaseAnonKey: !!config.supabaseAnonKey,
+    supabaseServiceKey: !!config.supabaseServiceKey,
+    telegramBotToken: !!config.telegramBotToken,
+    telegramEnabled: config.telegramEnabled,
+    port: config.port,
+  })
+})
+
 app.use('/api/auth', authRoutes)
 app.use('/api/chat', requireAuth, chatRoutes)
 app.use('/api/transactions', requireAuth, transactionsRoutes)

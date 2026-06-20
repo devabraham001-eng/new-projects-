@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Zap, Eye, EyeOff, Mail, Lock, Sparkles, Loader } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, Sparkles, Loader } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../components/ui/toast'
@@ -41,8 +41,8 @@ export default function Login() {
       <div className="w-full max-w-md">
         <div className="bg-surface-card border border-border rounded-2xl p-6 sm:p-10 shadow-lg shadow-black/5">
           <div className="flex items-center justify-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
-              <Zap size={20} className="text-white" />
+            <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center overflow-hidden">
+              <img src="/favicon.png" alt="PayPulse" className="w-6 h-6 object-contain" />
             </div>
             <span className="text-xl font-bold text-accent tracking-tight">PayPulse</span>
           </div>

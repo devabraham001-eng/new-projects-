@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, MessageCircle, Wallet, ArrowLeftRight,
   BookOpen, Settings, ChevronDown, Link2, Send, FileText,
-  MoreHorizontal, LogOut, Zap
+  MoreHorizontal, LogOut
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -65,8 +65,8 @@ export default function Sidebar({ activePage, onNavigate, collapsed }) {
       }`}
     >
       <div className={`flex items-center h-16 border-b border-border flex-shrink-0 ${collapsed ? 'justify-center px-0' : 'gap-3 px-5'}`}>
-        <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
-          <Zap size={18} className="text-white" />
+        <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <img src="/favicon.png" alt="PayPulse" className="w-5 h-5 object-contain" />
         </div>
         {!collapsed && (
           <div className="flex-1 min-w-0">

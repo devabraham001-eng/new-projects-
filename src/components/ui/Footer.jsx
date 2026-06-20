@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Zap, Code2, X, Mail } from 'lucide-react'
+import { Code2, X, Mail } from 'lucide-react'
 
 export default function Footer() {
   const navigate = useNavigate()
@@ -8,8 +8,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-12">
         <div className="flex flex-col md:flex-row items-start justify-between gap-8">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-accent flex items-center justify-center">
-              <Zap size={15} className="text-white" />
+            <div className="w-7 h-7 rounded-md bg-accent flex items-center justify-center overflow-hidden">
+              <img src="/favicon.png" alt="PayPulse" className="w-4 h-4 object-contain" />
             </div>
             <span className="font-bold text-accent tracking-tight">PayPulse</span>
           </div>

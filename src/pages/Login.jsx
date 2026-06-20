@@ -26,8 +26,8 @@ export default function Login() {
         navigate('/dashboard')
       } else {
         await signUp(email, password, name)
-        toast('Account created! Check your email to confirm.')
-        setMode('login')
+        toast('Account created!')
+        navigate('/dashboard')
       }
     } catch (err) {
       toast(err.message)

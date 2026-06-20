@@ -27,12 +27,21 @@ router.post('/register', async (req, res) => {
     if (error) return res.status(400).json({ error: error.message })
 
     if (data.user) {
+      await supabase.auth.admin.updateUserById(data.user.id, {
+        email_confirm: true,
+      })
+
       const { error: profileError } = await supabase.from('profiles').insert({
         id: data.user.id,
         name: name || email.split('@')[0],
         email,
       })
       if (profileError) console.error('[Profile Insert Error]', profileError)
+
+      const { data: sessionData, error: sessionError } = await anonClient.auth.signInWithPassword({ email, password })
+      if (sessionError) console.error('[Auto SignIn Error]', sessionError)
+
+      return res.json({ user: sessionData?.user || data.user, session: sessionData?.session || null })
     }
 
     res.json({ user: data.user, session: data.session })

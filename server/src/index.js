@@ -1,5 +1,5 @@
 process.on('unhandledRejection', (err) => {
-  console.error('[Unhandled Rejection]', err?.message || err)
+  console.error('[Unhandled Rejection]', err?.stack || err?.message || err)
 })
 
 import express from 'express'
@@ -41,8 +41,9 @@ app.use('/api/profile', requireAuth, profileRoutes)
 app.use('/api/telegram', requireAuth, telegramRoutes)
 
 app.use((err, req, res, next) => {
-  console.error('[Error]', err)
-  res.status(500).json({ error: 'Internal server error' })
+  console.error('[Error]', err.stack || err)
+  const status = err.status || err.statusCode || 500
+  res.status(status).json({ error: err.message || 'Internal server error' })
 })
 
 app.listen(config.port, '0.0.0.0', () => {

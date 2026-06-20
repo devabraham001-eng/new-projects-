@@ -1,0 +1,2 @@
+[PayPulse API] running on http://localhost:3003
+[Telegram] Disabled via TELEGRAM_ENABLED env var

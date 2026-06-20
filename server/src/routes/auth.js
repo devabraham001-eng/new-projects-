@@ -12,41 +12,51 @@ const anonClient = createClient(config.supabaseUrl, config.supabaseAnonKey, {
 })
 
 router.post('/register', async (req, res) => {
-  const { email, password, name } = req.body
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' })
-  }
+  try {
+    const { email, password, name } = req.body
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' })
+    }
 
-  const { data, error } = await anonClient.auth.signUp({
-    email,
-    password,
-    options: { data: { full_name: name || email.split('@')[0] } },
-  })
-
-  if (error) return res.status(400).json({ error: error.message })
-
-  if (data.user) {
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: data.user.id,
-      name: name || email.split('@')[0],
+    const { data, error } = await anonClient.auth.signUp({
       email,
+      password,
+      options: { data: { full_name: name || email.split('@')[0] } },
     })
-    if (profileError) console.error('[Profile Insert Error]', profileError)
-  }
 
-  res.json({ user: data.user, session: data.session })
+    if (error) return res.status(400).json({ error: error.message })
+
+    if (data.user) {
+      const { error: profileError } = await supabase.from('profiles').insert({
+        id: data.user.id,
+        name: name || email.split('@')[0],
+        email,
+      })
+      if (profileError) console.error('[Profile Insert Error]', profileError)
+    }
+
+    res.json({ user: data.user, session: data.session })
+  } catch (err) {
+    console.error('[Register Error]', err.stack || err)
+    res.status(500).json({ error: err.message || 'Registration failed' })
+  }
 })
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' })
+  try {
+    const { email, password } = req.body
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' })
+    }
+
+    const { data, error } = await anonClient.auth.signInWithPassword({ email, password })
+    if (error) return res.status(401).json({ error: error.message })
+
+    res.json({ user: data.user, session: data.session })
+  } catch (err) {
+    console.error('[Login Error]', err.stack || err)
+    res.status(500).json({ error: err.message || 'Login failed' })
   }
-
-  const { data, error } = await anonClient.auth.signInWithPassword({ email, password })
-  if (error) return res.status(401).json({ error: error.message })
-
-  res.json({ user: data.user, session: data.session })
 })
 
 router.post('/logout', async (req, res) => {
@@ -62,15 +72,20 @@ router.post('/logout', async (req, res) => {
 })
 
 router.post('/refresh', async (req, res) => {
-  const { refresh_token } = req.body
-  if (!refresh_token) {
-    return res.status(400).json({ error: 'Refresh token is required' })
+  try {
+    const { refresh_token } = req.body
+    if (!refresh_token) {
+      return res.status(400).json({ error: 'Refresh token is required' })
+    }
+
+    const { data, error } = await anonClient.auth.refreshSession({ refresh_token })
+    if (error) return res.status(401).json({ error: error.message })
+
+    res.json({ user: data.user, session: data.session })
+  } catch (err) {
+    console.error('[Refresh Error]', err.stack || err)
+    res.status(500).json({ error: err.message || 'Refresh failed' })
   }
-
-  const { data, error } = await anonClient.auth.refreshSession({ refresh_token })
-  if (error) return res.status(401).json({ error: error.message })
-
-  res.json({ user: data.user, session: data.session })
 })
 
 router.get('/me', async (req, res) => {

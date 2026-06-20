@@ -135,14 +135,7 @@ export default function Login() {
             </button>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-border text-center">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="text-sm text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded transition-colors"
-            >
-              Continue as guest &rarr;
-            </button>
-          </div>
+
         </div>
 
         <p className="mt-6 text-center text-xs text-muted">

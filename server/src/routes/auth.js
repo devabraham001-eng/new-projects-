@@ -50,6 +50,17 @@ router.post('/login', async (req, res) => {
     }
 
     const { data, error } = await anonClient.auth.signInWithPassword({ email, password })
+    if (error?.message?.toLowerCase().includes('email not confirmed')) {
+      const { data: users } = await supabase.auth.admin.listUsers()
+      const user = users?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase())
+      if (user) {
+        await supabase.auth.admin.updateUserById(user.id, { email_confirm: true })
+        const { data: retry, error: retryErr } = await anonClient.auth.signInWithPassword({ email, password })
+        if (retryErr) return res.status(401).json({ error: retryErr.message })
+        return res.json({ user: retry.user, session: retry.session })
+      }
+    }
+
     if (error) return res.status(401).json({ error: error.message })
 
     res.json({ user: data.user, session: data.session })

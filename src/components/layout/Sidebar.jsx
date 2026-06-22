@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, MessageCircle, Wallet, ArrowLeftRight,
   BookOpen, Settings, ChevronDown, Link2, Send, FileText,
-  MoreHorizontal, LogOut, PanelLeftClose, PanelLeftOpen
+  MoreHorizontal, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTheme } from '../../contexts/ThemeContext'
 
 const platformNav = [
   { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
@@ -34,6 +35,7 @@ const projects = [
 export default function Sidebar({ activePage, onNavigate, collapsed, onToggleCollapse }) {
   const [expandedChat, setExpandedChat] = useState(false)
   const { user, signOut } = useAuth()
+  const { theme, toggle } = useTheme()
   const navigate = useNavigate()
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
@@ -183,6 +185,35 @@ export default function Sidebar({ activePage, onNavigate, collapsed, onToggleCol
           </div>
         </>
       )}
+
+      <div className={`border-t border-border py-2 ${collapsed ? 'flex flex-col items-center gap-2' : 'space-y-0.5'}`}>
+        {collapsed ? (
+          <button
+            onClick={toggle}
+            className="w-full flex items-center justify-center h-9 text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-lg transition-colors"
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        ) : (
+          <button
+            onClick={toggle}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-muted hover:text-text-primary hover:bg-surface-hover transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          >
+            <div className="flex items-center gap-3">
+              <Sun size={16} className="text-muted" />
+              <span>Appearance</span>
+            </div>
+            <div className="relative w-10 h-5 flex items-center">
+              <div className={`w-10 h-5 rounded-full border transition-colors duration-200 ${theme === 'dark' ? 'bg-muted/20 border-white/40' : 'bg-black/5 border-black/20'}`} />
+              <div className={`absolute w-[18px] h-[18px] rounded-full bg-white shadow-sm border transition-transform duration-200 flex items-center justify-center ${theme === 'dark' ? 'translate-x-[21px] border-white/60' : 'translate-x-[2px] border-black/30'}`}>
+                {theme === 'dark' ? <Moon size={8} className="text-[#0f0f0f]" /> : <Sun size={8} className="text-[#0f0f0f]" />}
+              </div>
+            </div>
+          </button>
+        )}
+      </div>
 
       <div className={`border-t border-border py-3 ${collapsed ? 'flex flex-col items-center gap-2' : 'space-y-0.5'}`}>
         <button

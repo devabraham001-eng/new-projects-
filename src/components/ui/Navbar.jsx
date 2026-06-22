@@ -37,11 +37,15 @@ export default function Navbar() {
           ))}
           <button
             onClick={toggle}
-            className="text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded transition-colors"
+            className="flex items-center gap-2 text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded transition-colors"
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <div className="relative w-10 h-5 flex items-center">
+              <div className={`w-10 h-5 rounded-full border transition-colors duration-200 ${theme === 'dark' ? 'bg-muted/20 border-white/40' : 'bg-black/5 border-black/20'}`} />
+              <div className={`absolute w-[18px] h-[18px] rounded-full bg-white shadow-sm border transition-transform duration-200 flex items-center justify-center ${theme === 'dark' ? 'translate-x-[21px] border-white/60' : 'translate-x-[2px] border-black/30'}`}>
+                {theme === 'dark' ? <Moon size={8} className="text-[#0f0f0f]" /> : <Sun size={8} className="text-[#0f0f0f]" />}
+              </div>
+            </div>
           </button>
           <button
             onClick={() => navigate('/login')}
@@ -78,10 +82,15 @@ export default function Navbar() {
             <div className="mt-2 flex flex-col gap-2">
               <button
                 onClick={toggle}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-muted hover:text-text-primary hover:bg-surface-hover transition-all"
+                className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm text-muted hover:text-text-primary hover:bg-surface-hover transition-all"
               >
-                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                <div className="relative w-10 h-5 flex items-center">
+                  <div className={`w-10 h-5 rounded-full border transition-colors duration-200 ${theme === 'dark' ? 'bg-muted/20 border-white/40' : 'bg-black/5 border-black/20'}`} />
+                  <div className={`absolute w-[18px] h-[18px] rounded-full bg-white shadow-sm border transition-transform duration-200 flex items-center justify-center ${theme === 'dark' ? 'translate-x-[21px] border-white/60' : 'translate-x-[2px] border-black/30'}`}>
+                    {theme === 'dark' ? <Moon size={8} className="text-[#0f0f0f]" /> : <Sun size={8} className="text-[#0f0f0f]" />}
+                  </div>
+                </div>
               </button>
               <button onClick={() => { setOpen(false); navigate('/login') }} className="w-full px-4 py-3 rounded-lg text-sm text-muted hover:text-text-primary hover:bg-surface-hover transition-all">
                 Login

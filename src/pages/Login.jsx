@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Mail, Lock, Sparkles, Loader } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, Loader } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../components/ui/toast'
@@ -37,27 +37,18 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-secondary flex items-center justify-center p-5">
-      <div className="w-full max-w-md">
-        <div className="bg-surface-card border border-border rounded-2xl p-6 sm:p-10 shadow-lg shadow-black/5">
-          <div className="flex items-center justify-center gap-2.5 mb-8">
-            <img src="/favicon.png" alt="PayPulse" className="w-9 h-9" />
-            <span className="text-xl font-bold text-accent tracking-tight">PayPulse</span>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-surface-secondary">
+      <div className="w-full max-w-sm">
+        <div className="bg-surface-card border border-border rounded-xl p-6 shadow-lg shadow-black/5">
+          <div className="flex flex-col items-center gap-2 mb-6">
+            <img src="/favicon.png" alt="PayPulse" className="w-8 h-8" />
+            <span className="text-lg font-semibold text-text-primary">PayPulse</span>
           </div>
 
-          <h1 className="text-2xl font-semibold text-center mb-1 text-text-primary">
-            {mode === 'login' ? 'Welcome back' : 'Create account'}
-          </h1>
-          <p className="text-sm text-muted text-center mb-8">
-            {mode === 'login'
-              ? 'Sign in to your dashboard'
-              : 'Register to start banking with chat'}
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'register' && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono text-muted uppercase tracking-wider" htmlFor="name">Full Name</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-text-primary" htmlFor="name">Full Name</label>
                 <input
                   id="name"
                   type="text"
@@ -70,10 +61,10 @@ export default function Login() {
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-mono text-muted uppercase tracking-wider" htmlFor="email">Email</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-text-primary" htmlFor="email">Email</label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                 <input
                   id="email"
                   type="email"
@@ -86,10 +77,10 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-mono text-muted uppercase tracking-wider" htmlFor="password">Password</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-text-primary" htmlFor="password">Password</label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                 <input
                   id="password"
                   type={showPw ? 'text' : 'password'}
@@ -103,7 +94,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded transition-colors"
                   aria-label={showPw ? 'Hide password' : 'Show password'}
                 >
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -111,29 +102,28 @@ export default function Login() {
               </div>
             </div>
 
-            <Button variant="primary" className="w-full" size="lg" disabled={submitting}>
+            <Button type="submit" className="w-full" variant="primary" disabled={submitting}>
               {submitting ? (
                 <Loader size={16} className="animate-spin" />
               ) : mode === 'login' ? (
-                <><Sparkles size={16} /> Sign In</>
+                'Sign In'
               ) : (
                 'Create Account'
               )}
             </Button>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                className="text-sm text-muted hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded transition-colors"
+              >
+                {mode === 'login'
+                  ? "Don't have an account? Register"
+                  : 'Already have an account? Sign in'}
+              </button>
+            </div>
           </form>
-
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="text-sm text-muted hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded transition-colors"
-            >
-              {mode === 'login'
-                ? "Don't have an account? Register"
-                : 'Already have an account? Sign in'}
-            </button>
-          </div>
-
-
         </div>
 
         <p className="mt-6 text-center text-xs text-muted">

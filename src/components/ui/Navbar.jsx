@@ -40,10 +40,10 @@ export default function Navbar() {
             className="flex items-center gap-2 text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded transition-colors"
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            <div className="relative w-9 h-4 flex items-center">
-              <div className={`w-9 h-4 rounded-full transition-colors duration-200 ${theme === 'dark' ? 'bg-accent' : 'bg-border'}`} />
-              <div className={`absolute w-3.5 h-3.5 rounded-full bg-white shadow-sm transition-transform duration-200 flex items-center justify-center ${theme === 'dark' ? 'translate-x-[20px]' : 'translate-x-[2px]'}`}>
-                {theme === 'dark' ? <Moon size={7} className="text-[#0f0f0f]" /> : <Sun size={7} className="text-[#0f0f0f]" />}
+            <div className="relative w-10 h-5 flex items-center">
+              <div className={`w-10 h-5 rounded-full border transition-colors duration-200 ${theme === 'dark' ? 'bg-muted/20 border-white/40' : 'bg-black/5 border-black/20'}`} />
+              <div className={`absolute w-[18px] h-[18px] rounded-full bg-white shadow-sm border transition-transform duration-200 flex items-center justify-center ${theme === 'dark' ? 'translate-x-[21px] border-white/60' : 'translate-x-[2px] border-black/30'}`}>
+                {theme === 'dark' ? <Moon size={8} className="text-[#0f0f0f]" /> : <Sun size={8} className="text-[#0f0f0f]" />}
               </div>
             </div>
           </button>
@@ -85,10 +85,10 @@ export default function Navbar() {
                 className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm text-muted hover:text-text-primary hover:bg-surface-hover transition-all"
               >
                 <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-                <div className="relative w-9 h-4 flex items-center">
-                  <div className={`w-9 h-4 rounded-full transition-colors duration-200 ${theme === 'dark' ? 'bg-accent' : 'bg-border'}`} />
-                  <div className={`absolute w-3.5 h-3.5 rounded-full bg-white shadow-sm transition-transform duration-200 flex items-center justify-center ${theme === 'dark' ? 'translate-x-[20px]' : 'translate-x-[2px]'}`}>
-                    {theme === 'dark' ? <Moon size={7} className="text-[#0f0f0f]" /> : <Sun size={7} className="text-[#0f0f0f]" />}
+                <div className="relative w-10 h-5 flex items-center">
+                  <div className={`w-10 h-5 rounded-full border transition-colors duration-200 ${theme === 'dark' ? 'bg-muted/20 border-white/40' : 'bg-black/5 border-black/20'}`} />
+                  <div className={`absolute w-[18px] h-[18px] rounded-full bg-white shadow-sm border transition-transform duration-200 flex items-center justify-center ${theme === 'dark' ? 'translate-x-[21px] border-white/60' : 'translate-x-[2px] border-black/30'}`}>
+                    {theme === 'dark' ? <Moon size={8} className="text-[#0f0f0f]" /> : <Sun size={8} className="text-[#0f0f0f]" />}
                   </div>
                 </div>
               </button>

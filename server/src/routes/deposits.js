@@ -12,10 +12,7 @@ router.post('/init', async (req, res) => {
     }
 
     const ref = `DEP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
-
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(req.user.id)
-    if (userError) return res.status(500).json({ error: 'Auth error: ' + userError.message })
-    const email = user?.email || 'user@paypulse.app'
+    const email = req.user.email
 
     const origin = req.headers.origin || 'https://new-projects-three.vercel.app'
     const callbackUrl = `${origin}/dashboard?reference=${ref}`
@@ -39,6 +36,7 @@ router.post('/init', async (req, res) => {
 
     res.json({ reference: ref, authorization_url: result.authorizationUrl })
   } catch (err) {
+    console.error('[Deposit Init Error]', err)
     res.status(500).json({ error: err.message })
   }
 })

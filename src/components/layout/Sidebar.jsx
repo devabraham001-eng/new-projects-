@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, MessageCircle, Wallet, ArrowLeftRight,
+  LayoutDashboard, MessageCircle, Wallet, ArrowLeftRight, PiggyBank,
   BookOpen, Settings, ChevronDown, Link2, Send, FileText,
   MoreHorizontal, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon
 } from 'lucide-react'
@@ -11,6 +11,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 
 const platformNav = [
   { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'deposit', label: 'Deposit', icon: PiggyBank },
   {
     id: 'chat', label: 'Chat', icon: MessageCircle,
     children: [

@@ -74,6 +74,26 @@ class PaystackClient {
     }
     return { success: false, message: data?.message || 'Failed to finalize transfer' }
   }
+
+  async initializeCheckout(email, amount, reference) {
+    const data = await this.#request('POST', '/transaction/initialize', {
+      email,
+      amount: Math.round(amount * 100),
+      reference,
+    })
+    if (data?.status) {
+      return { success: true, authorizationUrl: data.data.authorization_url, accessCode: data.data.access_code }
+    }
+    return { success: false, message: data?.message || 'Failed to initialize checkout' }
+  }
+
+  async verifyTransaction(reference) {
+    const data = await this.#request('GET', `/transaction/verify/${reference}`)
+    if (data?.status && data.data?.status === 'success') {
+      return { success: true, amount: data.data.amount / 100 }
+    }
+    return { success: false, message: data?.data?.gateway_response || data?.message || 'Payment not verified' }
+  }
 }
 
 export const paystack = new PaystackClient()

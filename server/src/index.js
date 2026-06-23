@@ -14,6 +14,7 @@ import transactionsRoutes from './routes/transactions.js'
 import walletsRoutes from './routes/wallets.js'
 import profileRoutes from './routes/profile.js'
 import telegramRoutes from './routes/telegram.js'
+import depositRoutes from './routes/deposits.js'
 
 const app = express()
 
@@ -40,6 +41,7 @@ app.use('/api/transactions', requireAuth, transactionsRoutes)
 app.use('/api/wallets', requireAuth, walletsRoutes)
 app.use('/api/profile', requireAuth, profileRoutes)
 app.use('/api/telegram', requireAuth, telegramRoutes)
+app.use('/api/deposits', requireAuth, depositRoutes)
 
 app.use((err, req, res, next) => {
   console.error('[Error]', err.stack || err)

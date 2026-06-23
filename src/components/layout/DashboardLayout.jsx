@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, MessageCircle, Wallet, ArrowLeftRight, Settings, User, LogOut, PanelLeftClose, PanelLeftOpen
+  LayoutDashboard, MessageCircle, Wallet, ArrowLeftRight, Settings, User, LogOut, PanelLeftClose, PanelLeftOpen, PiggyBank
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../ui/toast'
@@ -14,9 +14,11 @@ import DashboardChat from '../../pages/DashboardChat'
 import DashboardWallet from '../../pages/DashboardWallet'
 import DashboardTransactions from '../../pages/DashboardTransactions'
 import DashboardSettings from '../../pages/DashboardSettings'
+import DashboardDeposit from '../../pages/DashboardDeposit'
 
 const navItems = [
   { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'deposit', label: 'Deposit', icon: PiggyBank },
   { id: 'chat', label: 'Chat', icon: MessageCircle },
   { id: 'wallet', label: 'Wallet', icon: Wallet },
   { id: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
@@ -27,6 +29,10 @@ const breadcrumbMap = {
   home: [
     { label: 'Dashboard' },
     { label: 'Overview' },
+  ],
+  deposit: [
+    { label: 'Dashboard', onClick: 'home' },
+    { label: 'Deposit' },
   ],
   chat: [
     { label: 'Dashboard', onClick: 'home' },
@@ -136,6 +142,7 @@ export default function DashboardLayout() {
   }
 
   const pages = {
+    deposit: DashboardDeposit,
     chat: DashboardChat,
     wallet: DashboardWallet,
     transactions: DashboardTransactions,

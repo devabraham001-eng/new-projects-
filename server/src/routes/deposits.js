@@ -5,36 +5,42 @@ import { supabase } from '../lib/supabase.js'
 const router = Router()
 
 router.post('/init', async (req, res) => {
-  const { amount } = req.body
-  if (!amount || amount < 100) {
-    return res.status(400).json({ error: 'Minimum deposit is ₦100' })
+  try {
+    const { amount } = req.body
+    if (!amount || amount < 100) {
+      return res.status(400).json({ error: 'Minimum deposit is ₦100' })
+    }
+
+    const ref = `DEP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
+
+    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(req.user.id)
+    if (userError) return res.status(500).json({ error: 'Auth error: ' + userError.message })
+    const email = user?.email || 'user@paypulse.app'
+
+    const origin = req.headers.origin || 'https://new-projects-three.vercel.app'
+    const callbackUrl = `${origin}/dashboard?reference=${ref}`
+
+    const result = await paystack.initializeCheckout(email, amount, ref, callbackUrl)
+    if (!result.success) {
+      return res.status(500).json({ error: 'Paystack: ' + result.message })
+    }
+
+    const { error: insertError } = await supabase.from('transactions').insert({
+      user_id: req.user.id,
+      reference: ref,
+      amount,
+      type: 'credit',
+      recipient: 'Deposit',
+      recipient_account: email,
+      status: 'PENDING',
+      provider: 'paystack',
+    })
+    if (insertError) return res.status(500).json({ error: 'DB error: ' + insertError.message })
+
+    res.json({ reference: ref, authorization_url: result.authorizationUrl })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
   }
-
-  const ref = `DEP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
-
-  const { data: { user } } = await supabase.auth.admin.getUserById(req.user.id)
-  const email = user?.email || 'user@paypulse.app'
-
-  const origin = req.headers.origin || 'https://new-projects-three.vercel.app'
-  const callbackUrl = `${origin}/dashboard?reference=${ref}`
-
-  const result = await paystack.initializeCheckout(email, amount, ref, callbackUrl)
-  if (!result.success) {
-    return res.status(500).json({ error: result.message })
-  }
-
-  await supabase.from('transactions').insert({
-    user_id: req.user.id,
-    reference: ref,
-    amount,
-    type: 'credit',
-    recipient: 'Deposit',
-    recipient_account: email,
-    status: 'PENDING',
-    provider: 'paystack',
-  })
-
-  res.json({ reference: ref, authorization_url: result.authorizationUrl })
 })
 
 router.post('/verify', async (req, res) => {

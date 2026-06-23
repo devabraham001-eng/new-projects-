@@ -53,6 +53,7 @@ router.post('/parse', async (req, res) => {
     user_id: req.user.id,
     amount: -intent.amount,
     recipient_account: account,
+    reference_code: ref,
     status: 'PENDING',
   }).select().single()
 

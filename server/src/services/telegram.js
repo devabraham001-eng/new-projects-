@@ -279,6 +279,7 @@ export function startTelegramBot() {
       user_id: link.user_id,
       amount: -intent.amount,
       recipient_account: account,
+      reference_code: ref,
       status,
     })
 

@@ -1,9 +1,17 @@
 import { Router } from 'express'
+import { createClient } from '@supabase/supabase-js'
 import { paystack } from '../services/paystack.js'
 import { supabase } from '../lib/supabase.js'
 import { config } from '../config.js'
 
 const router = Router()
+
+function userClient(token) {
+  return createClient(config.supabaseUrl, config.supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  })
+}
 
 router.post('/init', async (req, res) => {
   try {
@@ -23,7 +31,13 @@ router.post('/init', async (req, res) => {
       return res.status(500).json({ error: 'Paystack: ' + result.message })
     }
 
-    const { error: insertError } = await supabase.from('transactions').insert({
+    const token = req.headers.authorization?.slice(7)
+    const anon = createClient(config.supabaseUrl, config.supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    })
+
+    const { error: insertError } = await anon.from('transactions').insert({
       user_id: req.user.id,
       amount,
       recipient_account: email.slice(0, 20),

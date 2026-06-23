@@ -26,7 +26,7 @@ router.post('/init', async (req, res) => {
     const { error: insertError } = await supabase.from('transactions').insert({
       user_id: req.user.id,
       amount,
-      recipient_account: email,
+      recipient_account: email.slice(0, 20),
       reference_code: ref,
       status: 'PENDING',
     })

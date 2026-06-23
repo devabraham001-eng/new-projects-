@@ -4,7 +4,27 @@ import { supabase } from '../lib/supabase.js'
 import { parseMessage } from './nlp.js'
 import { paystack } from './paystack.js'
 
+const BOT_PHOTO_URL = 'https://new-projects-three.vercel.app/favicon.png'
+
 let bot = null
+
+async function setBotPhoto() {
+  try {
+    const res = await fetch(BOT_PHOTO_URL)
+    if (!res.ok) return
+    const buffer = Buffer.from(await res.arrayBuffer())
+    const formData = new FormData()
+    const blob = new Blob([buffer], { type: 'image/png' })
+    formData.append('photo', blob, 'favicon.png')
+    await fetch(`https://api.telegram.org/bot${config.telegramBotToken}/setMyPhoto`, {
+      method: 'POST',
+      body: formData,
+    })
+    console.log('[Telegram] Bot profile picture updated')
+  } catch {
+    // non-critical
+  }
+}
 
 export function startTelegramBot() {
   if (!config.telegramBotToken) {
@@ -22,7 +42,7 @@ export function startTelegramBot() {
   function startWithRetry(retries = 5) {
     bot.deleteWebHook()
       .then(() => bot.startPolling())
-      .then(() => console.log('[Telegram] Bot started (polling)'))
+      .then(() => { console.log('[Telegram] Bot started (polling)'); setBotPhoto() })
       .catch((err) => {
         if (err.code === 'ETELEGRAM' && err.message.includes('409') && retries > 0) {
           console.log(`[Telegram] 409 conflict (${retries} retries left), waiting 5s...`)
@@ -45,6 +65,53 @@ export function startTelegramBot() {
 
   startWithRetry()
 
+  bot.onText(/\/deposit(?:\s+(\d+))?/, async (msg, match) => {
+    const chatId = msg.chat.id
+    const amount = parseInt(match[1], 10)
+
+    if (!amount || amount < 100) {
+      await bot.sendMessage(chatId, 'Usage: `/deposit AMOUNT`\n\nExample: `/deposit 5000`\n\nMinimum deposit: \u20A6100', { parse_mode: 'Markdown' })
+      return
+    }
+
+    const { data: link } = await supabase
+      .from('telegram_links')
+      .select('user_id')
+      .eq('telegram_chat_id', String(chatId))
+      .maybeSingle()
+
+    if (!link) {
+      await bot.sendMessage(chatId, 'Please link your account first with `/link youremail@example.com`', { parse_mode: 'Markdown' })
+      return
+    }
+
+    const { data: profile } = await supabase.from('users').select('email').eq('id', link.user_id).maybeSingle()
+    const email = profile?.email || 'user@paypulse.app'
+
+    const ref = `DEP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
+    const callbackUrl = `https://new-projects-three.vercel.app/dashboard?reference=${ref}`
+
+    const result = await paystack.initializeCheckout(email, amount, ref, callbackUrl)
+    if (!result.success) {
+      await bot.sendMessage(chatId, 'Failed to create deposit. Please try again later.')
+      return
+    }
+
+    await supabase.from('transactions').insert({
+      user_id: link.user_id,
+      amount,
+      recipient_account: email.slice(0, 20),
+      reference_code: ref,
+      status: 'PENDING',
+    })
+
+    await bot.sendMessage(
+      chatId,
+      `*Deposit \u20A6${amount.toLocaleString()}*\n\nClick the link below to complete payment:\n${result.authorizationUrl}\n\nAfter payment, your balance will update automatically.`,
+      { parse_mode: 'Markdown' }
+    )
+  })
+
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id
     const username = msg.from?.username || msg.from?.first_name || 'User'
@@ -58,7 +125,7 @@ export function startTelegramBot() {
     if (link) {
       await bot.sendMessage(
         chatId,
-        `*Welcome back, ${username}!* \u{1F4B3}\n\nTry:\n\`check balance\`\n\`transfer 2000 to 7044879145\`\n\`history\``,
+        `*Welcome back, ${username}!* \u{1F4B3}\n\nTry:\n\`check balance\`\n\`transfer 2000 to 7044879145\`\n\`/deposit 5000\`\n\`history\``,
         { parse_mode: 'Markdown' }
       )
       return
@@ -66,7 +133,7 @@ export function startTelegramBot() {
 
     await bot.sendMessage(
       chatId,
-      `*Welcome to PayPulse!* \u{1F4B3}\n\nI'm your conversational banking assistant.\n\nTo link your account, send:\n\n\`/link youremail@example.com\`\n\nThen try:\n\`check balance\`\n\`transfer 2000 to 7044879145\``,
+      `*Welcome to PayPulse!* \u{1F4B3}\n\nI'm your conversational banking assistant.\n\nTo link your account, send:\n\n\`/link youremail@example.com\`\n\nThen try:\n\`check balance\`\n\`transfer 2000 to 7044879145\`\n\`/deposit 5000\``,
       { parse_mode: 'Markdown' }
     )
   })
@@ -89,7 +156,7 @@ export function startTelegramBot() {
     if (!code) {
       await bot.sendMessage(
         chatId,
-        'To link your account, send:\n\n`/link YOUR_EMAIL`\n\nUse the email you registered with on PayPulse.',
+        'To link your account, send:\n\n`/link YOUR_EMAIL`\n\nUse the email you registered with on PayPulse. Then try `check balance`, `transfer`, or `/deposit 5000`.',
         { parse_mode: 'Markdown' }
       )
       return
@@ -139,7 +206,7 @@ export function startTelegramBot() {
 
     await bot.sendMessage(
       chatId,
-      `\u2705 *Account linked successfully!*\n\nYou can now use PayPulse via Telegram.\n\nTry:\n\`check balance\`\n\`transfer 2000 to 7044879145\`\n\`history\``,
+      `\u2705 *Account linked successfully!*\n\nYou can now use PayPulse via Telegram.\n\nTry:\n\`check balance\`\n\`transfer 2000 to 7044879145\`\n\`/deposit 5000\`\n\`history\``,
       { parse_mode: 'Markdown' }
     )
   })
@@ -168,7 +235,7 @@ export function startTelegramBot() {
     if (!intent) {
       await bot.sendMessage(
         chatId,
-        'I didn\'t understand that. Try something like:\n\n`transfer 2000 to 7044879145`\n`check balance`\n`history`',
+        'I didn\'t understand that. Try something like:\n\n`transfer 2000 to 7044879145`\n`check balance`\n`/deposit 5000`\n`history`',
         { parse_mode: 'Markdown' }
       )
       return
@@ -177,11 +244,11 @@ export function startTelegramBot() {
     if (intent.action === 'balance') {
       const { data: txs } = await supabase
         .from('transactions')
-        .select('amount, type')
+        .select('amount')
         .eq('user_id', link.user_id)
         .in('status', ['SUCCESSFUL'])
 
-      const balance = (txs || []).reduce((s, t) => t.type === 'credit' ? s + Number(t.amount) : s - Number(t.amount), 0)
+      const balance = (txs || []).reduce((s, t) => s + Number(t.amount), 0)
       await bot.sendMessage(chatId, `Your balance is \u20A6${balance.toLocaleString()}`)
       return
     }
@@ -189,7 +256,7 @@ export function startTelegramBot() {
     if (intent.action === 'history') {
       const { data: txs } = await supabase
         .from('transactions')
-        .select('reference, amount, type, recipient, status, created_at')
+        .select('reference_code, amount, recipient_account, status, created_at')
         .eq('user_id', link.user_id)
         .order('created_at', { ascending: false })
         .limit(5)
@@ -200,7 +267,7 @@ export function startTelegramBot() {
       }
 
       const lines = txs.map(t =>
-        `\u2022 ${t.reference} | ${t.type === 'credit' ? '+' : '-'}\u20A6${Number(t.amount).toLocaleString()} | ${t.recipient} | ${t.status}`
+        `\u2022 ${t.reference_code || ''} | ${Number(t.amount) > 0 ? '+' : '-'}\u20A6${Math.abs(Number(t.amount)).toLocaleString()} | ${t.recipient_account || '-'} | ${t.status}`
       )
       await bot.sendMessage(chatId, `*Recent Transactions:*\n\n${lines.join('\n')}`, { parse_mode: 'Markdown' })
       return
@@ -256,7 +323,9 @@ export function startTelegramBot() {
       }
 
       await bot.sendMessage(chatId, `Wallet ${intent.accountNumber} linked successfully!`)
+      return
     }
+
     const ref = `PP-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`
     const account = intent.recipientAccount || '7044879145'
     const recipientName = intent.recipientName || account

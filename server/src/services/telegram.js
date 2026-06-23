@@ -247,7 +247,6 @@ export function startTelegramBot() {
 
       const { error } = await supabase.from('wallets').insert({
         user_id: link.user_id,
-        provider: 'paystack',
         account_number: intent.accountNumber,
       })
 
@@ -284,7 +283,6 @@ export function startTelegramBot() {
       recipient: recipientName,
       recipient_account: account,
       status,
-      provider: 'paystack',
     })
 
     if (txError) {

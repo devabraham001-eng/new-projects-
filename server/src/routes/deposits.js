@@ -30,7 +30,6 @@ router.post('/init', async (req, res) => {
       recipient: 'Deposit',
       recipient_account: email,
       status: 'PENDING',
-      provider: 'paystack',
     })
     if (insertError) return res.status(500).json({ error: 'DB error: ' + insertError.message })
 

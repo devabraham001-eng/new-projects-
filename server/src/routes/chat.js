@@ -57,7 +57,6 @@ router.post('/parse', async (req, res) => {
     recipient: intent.recipientName || accountInfo?.accountName || account,
     recipient_account: account,
     status: 'PENDING',
-    provider: intent.bank?.toLowerCase() || sourceWallet?.provider || 'paystack',
   }).select().single()
 
   if (txError) {

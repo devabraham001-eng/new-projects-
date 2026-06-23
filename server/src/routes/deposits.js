@@ -15,7 +15,10 @@ router.post('/init', async (req, res) => {
   const { data: { user } } = await supabase.auth.admin.getUserById(req.user.id)
   const email = user?.email || 'user@paypulse.app'
 
-  const result = await paystack.initializeCheckout(email, amount, ref)
+  const origin = req.headers.origin || 'https://new-projects-three.vercel.app'
+  const callbackUrl = `${origin}/dashboard?reference=${ref}`
+
+  const result = await paystack.initializeCheckout(email, amount, ref, callbackUrl)
   if (!result.success) {
     return res.status(500).json({ error: result.message })
   }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   LayoutDashboard, MessageCircle, Wallet, ArrowLeftRight, Settings, User, LogOut, PanelLeftClose, PanelLeftOpen, PiggyBank
 } from 'lucide-react'
@@ -61,10 +61,19 @@ export default function DashboardLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const { user, loading, signOut } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   useEffect(() => {
     if (!loading && !user) navigate('/login', { replace: true })
   }, [user, loading, navigate])
+
+  useEffect(() => {
+    const ref = searchParams.get('reference')
+    if (ref) {
+      setActivePage('deposit')
+      window.history.replaceState({}, '', '/dashboard')
+    }
+  }, [searchParams])
 
   // Auto-collapse sidebar on medium screens (768–1024px)
   useEffect(() => {

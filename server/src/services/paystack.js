@@ -75,11 +75,12 @@ class PaystackClient {
     return { success: false, message: data?.message || 'Failed to finalize transfer' }
   }
 
-  async initializeCheckout(email, amount, reference) {
+  async initializeCheckout(email, amount, reference, callbackUrl) {
     const data = await this.#request('POST', '/transaction/initialize', {
       email,
       amount: Math.round(amount * 100),
       reference,
+      callback_url: callbackUrl,
     })
     if (data?.status) {
       return { success: true, authorizationUrl: data.data.authorization_url, accessCode: data.data.access_code }

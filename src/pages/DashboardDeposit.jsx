@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Wallet, ExternalLink, Check, Loader, ArrowLeft } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
@@ -10,31 +11,35 @@ export default function DashboardDeposit() {
   const [amount, setAmount] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(null)
+  const [verifying, setVerifying] = useState(false)
+  const [searchParams] = useSearchParams()
   const { toast } = useToast()
+
+  useEffect(() => {
+    const ref = searchParams.get('reference')
+    if (ref) {
+      setVerifying(true)
+      api.post('/deposits/verify', { reference: ref })
+        .then(result => {
+          if (result.status === 'SUCCESSFUL') {
+            setSuccess(result.amount || true)
+            toast('Deposit successful!')
+          } else {
+            toast('Payment pending — check transactions page.')
+          }
+        })
+        .catch(() => toast('Could not verify payment. Check transactions page.'))
+        .finally(() => setVerifying(false))
+      window.history.replaceState({}, '', '/deposit')
+    }
+  }, [])
 
   const handleDeposit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
-    setSuccess(null)
     try {
       const data = await api.post('/deposits/init', { amount: Number(amount) })
-      const popup = window.open(data.authorization_url, 'paystack', 'width=600,height=700')
-      if (!popup) {
-        window.location.href = data.authorization_url
-      }
-      const pollRef = setInterval(async () => {
-        try {
-          const result = await api.post('/deposits/verify', { reference: data.reference })
-          if (result.status === 'SUCCESSFUL') {
-            clearInterval(pollRef)
-            setSubmitting(false)
-            setSuccess(Number(amount))
-            setAmount('')
-            toast('Deposit successful!')
-          }
-        } catch {}
-      }, 3000)
-      setTimeout(() => clearInterval(pollRef), 120000)
+      window.location.href = data.authorization_url
     } catch (err) {
       toast(err.message)
       setSubmitting(false)
@@ -55,13 +60,20 @@ export default function DashboardDeposit() {
             </div>
           </CardHeader>
           <CardContent>
-            {success ? (
+            {verifying ? (
+              <div className="text-center py-6 space-y-4">
+                <Loader size={28} className="animate-spin mx-auto text-accent" />
+                <p className="text-text-primary">Verifying payment...</p>
+              </div>
+            ) : success ? (
               <div className="text-center py-6 space-y-4">
                 <div className="w-14 h-14 rounded-full bg-success/10 border border-success/20 flex items-center justify-center mx-auto">
                   <Check size={28} className="text-success" />
                 </div>
                 <p className="text-lg font-semibold text-text-primary">Deposit Successful!</p>
-                <p className="text-2xl font-bold text-success">+NGN {success.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-success">
+                  +NGN {typeof success === 'number' ? success.toLocaleString() : ''}
+                </p>
                 <p className="text-sm text-muted">Your balance has been updated.</p>
                 <Button variant="primary" onClick={() => setSuccess(null)}>
                   Make Another Deposit
@@ -85,7 +97,7 @@ export default function DashboardDeposit() {
 
                 <Button type="submit" className="w-full" variant="primary" disabled={submitting || !amount}>
                   {submitting ? (
-                    <><Loader size={16} className="animate-spin" /> Processing...</>
+                    <><Loader size={16} className="animate-spin" /> Redirecting to Paystack...</>
                   ) : (
                     <><ExternalLink size={16} /> Deposit Now</>
                   )}

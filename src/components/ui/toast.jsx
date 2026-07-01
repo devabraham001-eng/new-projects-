@@ -1,6 +1,12 @@
 import { createContext, useContext, useState, useCallback } from 'react'
 import { cn } from '../../lib/utils'
-import { X } from 'lucide-react'
+import { X, CheckCircle, AlertCircle, Info } from 'lucide-react'
+
+const icons = {
+  success: CheckCircle,
+  error: AlertCircle,
+  info: Info,
+}
 
 const ToastContext = createContext(null)
 
@@ -12,7 +18,7 @@ export function ToastProvider({ children }) {
     setToasts(prev => [...prev, { id, message, type }])
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id))
-    }, 3000)
+    }, 4000)
   }, [])
 
   const dismiss = useCallback((id) => {
@@ -22,23 +28,40 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ toast: add }}>
       {children}
-      <div className="fixed bottom-0 sm:bottom-5 left-0 sm:left-auto right-0 sm:right-5 z-[100] flex flex-col gap-2 px-4 sm:px-0 sm:max-w-sm w-full pointer-events-none">
-        {toasts.map(t => (
-          <div
-            key={t.id}
-            className={cn(
-              'pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg animate-fade-in-up text-sm',
-              t.type === 'success' && 'bg-success/10 border-success/20 text-success',
-              t.type === 'error' && 'bg-error/10 border-error/20 text-error',
-              t.type === 'info' && 'bg-accent/5 border-accent/20 text-accent',
-            )}
-          >
-            <span className="flex-1">{t.message}</span>
-            <button onClick={() => dismiss(t.id)} className="opacity-60 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current rounded">
-              <X size={14} />
-            </button>
-          </div>
-        ))}
+      <div className="fixed top-4 sm:top-5 right-0 sm:right-5 left-0 sm:left-auto z-[100] flex flex-col gap-2.5 px-4 sm:px-0 sm:max-w-sm w-full pointer-events-none">
+        {toasts.map((t, i) => {
+          const Icon = icons[t.type] || Info
+          return (
+            <div
+              key={t.id}
+              className={cn(
+                'pointer-events-auto flex items-start gap-3 pl-3.5 pr-3 py-3 rounded-xl border shadow-xl text-sm animate-slide-in',
+                'bg-surface-card',
+                t.type === 'success' && 'border-l-4 border-l-success border-border text-text-primary',
+                t.type === 'error' && 'border-l-4 border-l-error border-border text-text-primary',
+                t.type === 'info' && 'border-l-4 border-l-accent border-border text-text-primary',
+              )}
+              style={{ animationDelay: `${i * 0}ms` }}
+            >
+              <Icon
+                size={18}
+                className={cn(
+                  'mt-0.5 shrink-0',
+                  t.type === 'success' && 'text-success',
+                  t.type === 'error' && 'text-error',
+                  t.type === 'info' && 'text-accent',
+                )}
+              />
+              <span className="flex-1 leading-relaxed">{t.message}</span>
+              <button
+                onClick={() => dismiss(t.id)}
+                className="mt-0.5 shrink-0 text-muted hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          )
+        })}
       </div>
     </ToastContext.Provider>
   )

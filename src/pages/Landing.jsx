@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import {
   MessageCircle, Wallet, Shield, ArrowRight,
-  Smartphone, Globe, Lock, Banknote, ZapOff, Menu, ChevronRight
+  Smartphone, Globe, Lock, Banknote, ZapOff, Menu
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Navbar from '../components/ui/Navbar'
@@ -60,19 +60,12 @@ export default function Landing() {
           </div>
 
           <div className="relative z-10 flex flex-col items-center px-5 text-center max-w-5xl mx-auto w-full" style={{ maxWidth: '390px' }}>
-            {/* ── Badge Row ── */}
-            <div className="sm:hidden flex items-center gap-1.5 mt-4 px-3 py-1.5 rounded-full border border-white/15 bg-white/5">
-              <span className="text-[11px] font-semibold text-white bg-white/15 px-1.5 py-0.5 rounded-full">New</span>
-              <span className="text-[12px] text-[#A0A0A0]">Chat-based banking · Instant transfers · No forms</span>
-              <ChevronRight size={14} className="text-[#A0A0A0] shrink-0" />
-            </div>
-
             {/* ── Headline ── */}
             <motion.h1
               initial={fadeUp.initial}
               animate={fadeUp.animate}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="sm:hidden text-[34px] font-bold leading-[1.15] tracking-[-0.02em] text-white mt-6"
+              className="sm:hidden text-[34px] font-medium leading-[1.15] tracking-[-0.02em] text-white mt-6"
             >
               Banking as simple as sending a{" "}
               <span className="text-[#22C55E]">text</span>

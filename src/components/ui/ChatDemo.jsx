@@ -146,7 +146,7 @@ export default function ChatDemo() {
                 >
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 ${
-                      isUser ? 'bg-accent text-white' : 'bg-surface-hover border border-border'
+                      isUser ? 'bg-accent text-text-inverted' : 'bg-surface-hover border border-border'
                     }`}
                     aria-hidden="true"
                   >

@@ -3,10 +3,11 @@ import { Slot } from '@radix-ui/react-slot'
 import { cn } from '../../lib/utils'
 
 const variants = {
-  default: 'bg-accent text-white hover:bg-accent-hover shadow-sm hover:shadow-md hover:shadow-black/10 active:scale-[0.97]',
+  default: 'bg-accent text-text-inverted hover:bg-accent-hover shadow-sm hover:shadow-md hover:shadow-black/10 active:scale-[0.97]',
+  primary: 'bg-accent text-text-inverted hover:bg-accent-hover shadow-sm hover:shadow-md hover:shadow-black/10 active:scale-[0.97]',
   secondary: 'border border-border text-accent hover:bg-accent/5 hover:border-accent/30',
   ghost: 'text-muted hover:text-text-primary hover:bg-surface-hover',
-  destructive: 'bg-error text-white hover:bg-error/90',
+  destructive: 'bg-error text-text-inverted hover:bg-error/90',
   link: 'text-accent underline-offset-4 hover:underline',
 }
 

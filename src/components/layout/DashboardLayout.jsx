@@ -288,7 +288,7 @@ function DashboardProfile() {
               className="w-full px-4 py-2.5 rounded-lg border border-border bg-surface text-text-primary text-sm sm:text-base opacity-60 cursor-not-allowed"
             />
           </div>
-          <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-full bg-accent text-white font-semibold text-sm hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all disabled:opacity-50">
+          <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-full bg-accent text-text-inverted font-semibold text-sm hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all disabled:opacity-50">
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </form>

@@ -141,7 +141,7 @@ export default function DashboardChat() {
                 </div>
                 <button
                   onClick={() => openWebview({ txId: tx.id, ref: inv.reference, amount: `\u20A6${Number(inv.amount).toLocaleString()}.00`, recipient: inv.recipient })}
-                  className="mt-3 w-full py-2.5 rounded-lg bg-accent text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-colors"
+                  className="mt-3 w-full py-2.5 rounded-lg bg-accent text-text-inverted font-semibold text-sm flex items-center justify-center gap-2 hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-colors"
                 >
                   <Lock size={14} /> Pay with OPay
                 </button>
@@ -231,7 +231,7 @@ export default function DashboardChat() {
             <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 ${
               msg.type === 'bot'
                 ? 'bg-surface-hover border border-border'
-                : 'bg-accent text-white'
+                : 'bg-accent text-text-inverted'
             }`} aria-hidden="true">
               {msg.type === 'bot' ? <Zap size={13} className="text-accent" /> : <User size={13} />}
             </div>
@@ -275,7 +275,7 @@ export default function DashboardChat() {
           <button
             onClick={handleSend}
             disabled={!input.trim()}
-            className="w-11 h-11 rounded-full bg-accent text-white flex items-center justify-center hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+            className="w-11 h-11 rounded-full bg-accent text-text-inverted flex items-center justify-center hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
             aria-label="Send message"
           >
             <Send size={16} />
@@ -344,7 +344,7 @@ export default function DashboardChat() {
                 <button
                   onClick={confirmPayment}
                   disabled={!phone || otp.length < 4 || confirming}
-                  className="w-full py-3 rounded-lg bg-accent text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 rounded-lg bg-accent text-text-inverted font-semibold text-sm flex items-center justify-center gap-2 hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {confirming ? <Loader size={14} className="animate-spin" /> : <Lock size={14} />}
                   {' '}Confirm Secure Payment
@@ -396,7 +396,7 @@ export default function DashboardChat() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowSuccess(false)}
-                className="flex-1 py-2.5 rounded-full bg-accent text-white font-semibold text-sm hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all"
+                className="flex-1 py-2.5 rounded-full bg-accent text-text-inverted font-semibold text-sm hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all"
               >
                 New Transaction
               </button>

@@ -120,7 +120,7 @@ export default function DashboardSettings() {
                   href={`https://t.me/${BOT_USERNAME}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-white font-semibold text-sm hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all w-fit"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-text-inverted font-semibold text-sm hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 transition-all w-fit"
                 >
                   <ExternalLink size={16} />
                   Open @{BOT_USERNAME}

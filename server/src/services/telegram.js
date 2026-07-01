@@ -1,4 +1,9 @@
 import TelegramBot from 'node-telegram-bot-api'
+import { createReadStream, createWriteStream, unlinkSync, existsSync } from 'fs'
+import { get } from 'https'
+import { join } from 'path'
+import { tmpdir } from 'os'
+import FormData from 'form-data'
 import { config } from '../config.js'
 import { supabase } from '../lib/supabase.js'
 import { parseMessage } from './nlp.js'
@@ -9,20 +14,37 @@ const BOT_PHOTO_URL = 'https://new-projects-three.vercel.app/favicon.png'
 let bot = null
 
 async function setBotPhoto() {
+  const tmp = join(tmpdir(), `paypulse-bot-photo-${Date.now()}.png`)
   try {
-    const res = await fetch(BOT_PHOTO_URL)
-    if (!res.ok) return
-    const buffer = Buffer.from(await res.arrayBuffer())
-    const formData = new FormData()
-    const blob = new Blob([buffer], { type: 'image/png' })
-    formData.append('photo', blob, 'favicon.png')
-    await fetch(`https://api.telegram.org/bot${config.telegramBotToken}/setMyPhoto`, {
-      method: 'POST',
-      body: formData,
+    await new Promise((resolve, reject) => {
+      const file = createWriteStream(tmp)
+      get(BOT_PHOTO_URL, (res) => {
+        if (res.statusCode !== 200) { file.close(); reject(new Error(`HTTP ${res.statusCode}`)); return }
+        res.pipe(file)
+        file.on('finish', resolve)
+        file.on('error', reject)
+      }).on('error', reject)
     })
+
+    const form = new FormData()
+    form.append('photo', createReadStream(tmp), { filename: 'favicon.png', contentType: 'image/png' })
+
+    await new Promise((resolve, reject) => {
+      form.submit(`https://api.telegram.org/bot${config.telegramBotToken}/setMyPhoto`, (err, res) => {
+        if (err) { reject(err); return }
+        let body = ''
+        res.on('data', (c) => body += c)
+        res.on('end', () => {
+          try { const j = JSON.parse(body); if (!j.ok) reject(new Error(JSON.stringify(j))); else resolve() } catch { reject(new Error(body)) }
+        })
+      })
+    })
+
     console.log('[Telegram] Bot profile picture updated')
-  } catch {
-    // non-critical
+  } catch (e) {
+    console.error('[Telegram] Failed to set bot photo:', e.message)
+  } finally {
+    try { if (existsSync(tmp)) unlinkSync(tmp) } catch {}
   }
 }
 

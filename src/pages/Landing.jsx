@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import {
   MessageCircle, Wallet, Shield, ArrowRight,
-  Smartphone, Globe, Lock, Banknote, ZapOff, Menu
+  Smartphone, Globe, Lock, Banknote, ZapOff
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Navbar from '../components/ui/Navbar'
@@ -27,54 +27,25 @@ export default function Landing() {
 
       <main>
         {/* ─── HERO ─── */}
-        <section className="relative min-h-screen flex flex-col items-center pt-0 pb-20 sm:pb-28 bg-[#0A0A0A] sm:bg-surface text-white sm:text-text-primary">
+        <section className="relative min-h-screen flex flex-col items-center pt-24 sm:pt-32 pb-20 sm:pb-28">
           <div
-            className="absolute inset-0 opacity-[0.06]"
+            className="absolute inset-0 opacity-[0.15]"
             style={{
               backgroundImage: `
-                linear-gradient(to right, rgba(255,255,255,0.12) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)
+                linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--color-border) 1px, transparent 1px)
               `,
               backgroundSize: '60px 60px',
             }}
           />
-          <div className="absolute left-1/2 top-[30%] h-[300px] w-[300px] sm:h-[600px] sm:w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/5 sm:bg-accent/5 blur-[80px] sm:blur-[120px]" />
+          <div className="absolute left-1/2 top-[30%] h-[300px] w-[300px] sm:h-[600px] sm:w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/5 blur-[80px] sm:blur-[120px]" />
 
-          {/* ── Mobile Navbar ── */}
-          <div className="sm:hidden relative z-10 w-full max-w-[390px] mx-auto">
-            <div className="flex items-center justify-between h-14 px-5">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="2" y="2" width="20" height="20" rx="6" fill="#22C55E" />
-                <path d="M7 12L10.5 15.5L17 9" stroke="#0A0A0A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="flex items-center gap-2">
-                <button className="bg-white text-black text-sm font-medium px-4 py-1.5 rounded-full">
-                  Try for free
-                </button>
-                <button className="text-white/80">
-                  <Menu size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="h-px bg-white/10" />
-          </div>
-
-          <div className="relative z-10 flex flex-col items-center px-5 text-center max-w-5xl mx-auto w-full" style={{ maxWidth: '390px' }}>
-            {/* ── Headline ── */}
+          <div className="relative z-10 flex flex-col items-center px-6 text-center max-w-5xl mx-auto w-full">
             <motion.h1
               initial={fadeUp.initial}
               animate={fadeUp.animate}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="sm:hidden text-[34px] font-medium leading-[1.15] tracking-[-0.02em] text-white mt-6"
-            >
-              Banking as simple as sending a{" "}
-              <span className="text-[#22C55E]">text</span>
-            </motion.h1>
-            <motion.h1
-              initial={fadeUp.initial}
-              animate={fadeUp.animate}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="hidden sm:block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.08] sm:leading-[1.04] tracking-tight text-text-primary text-balance"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.08] sm:leading-[1.04] tracking-tight text-text-primary text-balance"
             >
               Banking as simple as sending a{" "}
               <span className="relative inline-block">
@@ -83,21 +54,11 @@ export default function Landing() {
               </span>
             </motion.h1>
 
-            {/* ── Subheadline ── */}
             <motion.p
               initial={fadeUp.initial}
               animate={fadeUp.animate}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="sm:hidden mt-5 text-[14px] text-[#9A9A9A] leading-[1.6] max-w-[340px]"
-            >
-              No apps, no forms. Just type what you want and PayPulse handles the rest.
-              Conversational banking for the modern world.
-            </motion.p>
-            <motion.p
-              initial={fadeUp.initial}
-              animate={fadeUp.animate}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden sm:block mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-muted"
+              className="mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-muted"
             >
               No apps, no forms. Just type what you want and PayPulse handles the rest.
               Conversational banking for the modern world.
@@ -111,12 +72,12 @@ export default function Landing() {
               className="sm:hidden mt-10 w-full flex flex-col items-center gap-2.5"
             >
               <Link to="/login" className="w-full">
-                <button className="w-full h-12 flex items-center justify-center gap-2 bg-white text-black text-[15px] font-medium rounded-full">
+                <button className="w-full h-12 flex items-center justify-center gap-2 bg-accent text-text-inverted text-[15px] font-medium rounded-full">
                   Launch App <ArrowRight size={16} />
                 </button>
               </Link>
               <Link to="/login" className="w-full">
-                <button className="w-full h-12 flex items-center justify-center gap-2 bg-transparent text-white text-[15px] font-medium rounded-full border border-white/30">
+                <button className="w-full h-12 flex items-center justify-center gap-2 bg-transparent text-accent text-[15px] font-medium rounded-full border border-border-light">
                   Get Started
                 </button>
               </Link>
@@ -130,7 +91,7 @@ export default function Landing() {
               className="hidden sm:flex flex-col sm:flex-row items-center gap-4 mt-10"
             >
               <Link to="/login" className="w-full sm:w-auto">
-                <Button variant="primary" size="lg" className="bg-black text-white w-full sm:w-auto">
+                <Button variant="primary" size="lg" className="w-full sm:w-auto">
                   Launch App
                 </Button>
               </Link>
@@ -150,10 +111,10 @@ export default function Landing() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="flex flex-col items-center"
               >
-                <span className="text-[10px] font-mono text-white/40 uppercase tracking-[0.2em] flex items-center gap-3 mb-8">
-                  <span className="w-6 sm:w-8 h-px bg-white/15" />
+                <span className="text-[10px] font-mono text-muted uppercase tracking-[0.2em] flex items-center gap-3 mb-8">
+                  <span className="w-6 sm:w-8 h-px bg-border" />
                   Live Demo
-                  <span className="w-6 sm:w-8 h-px bg-white/15" />
+                  <span className="w-6 sm:w-8 h-px bg-border" />
                 </span>
                 <ChatDemo />
               </motion.div>

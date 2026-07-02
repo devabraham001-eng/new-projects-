@@ -3,7 +3,6 @@ import { Wallet, ArrowLeftRight, ArrowUpRight, Send, Plus } from 'lucide-react'
 import { Badge } from '../components/ui/badge'
 import { Skeleton } from '../components/ui/skeleton'
 import { api } from '../services/api'
-import { useAuth } from '../contexts/AuthContext'
 
 const statusConfig = {
   SUCCESSFUL: { variant: 'success', dot: true },
@@ -11,13 +10,10 @@ const statusConfig = {
   FAILED: { variant: 'error', dot: true },
 }
 
-const categoryColors = ['bg-purple-500', 'bg-red-500', 'bg-yellow-500', 'bg-teal-500']
-
 export default function DashboardHome({ onNavigate, searchQuery = '' }) {
   const [stats, setStats] = useState(null)
   const [txs, setTxs] = useState([])
   const [loading, setLoading] = useState(true)
-  const { user } = useAuth()
 
   useEffect(() => {
     Promise.all([
@@ -38,7 +34,6 @@ export default function DashboardHome({ onNavigate, searchQuery = '' }) {
     { label: 'Active Wallets', value: String(stats.activeWallets || 0), change: '', changeLabel: 'Linked accounts', icon: Wallet },
   ] : []
 
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
   const balance = stats?.totalBalance || 0
   const filteredTxs = searchQuery
     ? txs.filter(tx =>

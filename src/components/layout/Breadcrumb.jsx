@@ -3,7 +3,7 @@ import { ChevronRight } from 'lucide-react'
 
 export default function Breadcrumb({ items }) {
   return (
-    <div className="flex items-center gap-1.5 h-10 px-6 text-xs text-muted border-b border-border bg-surface flex-shrink-0">
+    <div className="hidden sm:flex items-center gap-1.5 h-10 px-6 text-xs text-muted border-b border-border bg-surface flex-shrink-0">
       {items.map((item, i) => (
         <Fragment key={i}>
           {i > 0 && <ChevronRight size={12} className="text-muted/30 flex-shrink-0" />}

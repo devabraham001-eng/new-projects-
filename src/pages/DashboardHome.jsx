@@ -96,10 +96,6 @@ export default function DashboardHome({ onNavigate, searchQuery = '' }) {
       {/* ── Mobile Hero Wallet Card ── */}
       <div className="md:hidden px-4 pt-4 pb-2">
         <div className="bg-surface-card rounded-[20px] px-5 py-6">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-mono text-muted uppercase tracking-wider">Wallet</span>
-          </div>
-          <p className="text-xs text-muted/70 mb-2">{userName}</p>
           <p className="text-3xl font-bold text-text-primary tracking-tight">\u20A6{balance.toLocaleString()}</p>
         </div>
       </div>

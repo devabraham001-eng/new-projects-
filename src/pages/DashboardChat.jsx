@@ -114,30 +114,30 @@ export default function DashboardChat() {
             <Badge variant="success" size="sm" dot className="mb-2">Account Verified</Badge>
             <p className="mb-3 text-text-primary">Recipient: <strong>{inv.recipient}</strong></p>
 
-            <Card className="relative overflow-hidden">
+            <Card className="relative overflow-hidden w-full min-w-0">
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-accent/20 via-accent/40 to-accent/20 rounded-t-xl" />
-              <div className="p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-[10px] font-mono text-muted uppercase tracking-wider flex items-center gap-1">
+              <div className="p-3 sm:p-4">
+                <div className="flex justify-between items-start sm:items-center mb-3 gap-2">
+                  <span className="text-[10px] font-mono text-muted uppercase tracking-wider flex items-center gap-1 shrink-0">
                     <Wallet size={10} /> Transfer Invoice
                   </span>
-                  <span className="text-xs font-mono text-accent">{inv.reference}</span>
+                  <span className="text-[10px] sm:text-xs font-mono text-accent truncate max-w-[50%] sm:max-w-none text-right">{inv.reference}</span>
                 </div>
-                <div className="flex justify-between items-center py-2.5 border-b border-border">
-                  <span className="text-sm text-muted">Amount</span>
-                  <span className="text-2xl font-bold text-accent tracking-tight">\u20A6{Number(inv.amount).toLocaleString()}.00</span>
+                <div className="flex justify-between items-center py-2.5 border-b border-border gap-3">
+                  <span className="text-sm text-muted shrink-0">Amount</span>
+                  <span className="text-xl sm:text-2xl font-bold text-accent tracking-tight text-right">{'\u20A6'}{Number(inv.amount).toLocaleString()}.00</span>
                 </div>
-                <div className="flex justify-between items-center py-2.5 border-b border-border text-sm">
-                  <span className="text-muted">Recipient</span>
-                  <span className="text-text-primary">{inv.recipient}</span>
+                <div className="flex justify-between items-center py-2.5 border-b border-border text-sm gap-3">
+                  <span className="text-muted shrink-0">Recipient</span>
+                  <span className="text-text-primary text-right truncate max-w-[60%]">{inv.recipient}</span>
                 </div>
-                <div className="flex justify-between items-center py-2.5 border-b border-border text-sm">
-                  <span className="text-muted">Account</span>
-                  <code className="text-xs font-mono text-accent">{inv.account}</code>
+                <div className="flex justify-between items-center py-2.5 border-b border-border text-sm gap-3">
+                  <span className="text-muted shrink-0">Account</span>
+                  <code className="text-xs font-mono text-accent text-right truncate max-w-[60%]">{inv.account}</code>
                 </div>
-                <div className="flex justify-between items-center py-2.5 text-sm">
-                  <span className="text-muted">Bank</span>
-                  <span className="text-text-primary">{inv.bank || 'OPay'}</span>
+                <div className="flex justify-between items-center py-2.5 text-sm gap-3">
+                  <span className="text-muted shrink-0">Bank</span>
+                  <span className="text-text-primary text-right truncate max-w-[60%]">{inv.bank || 'OPay'}</span>
                 </div>
                 <button
                   onClick={() => openWebview({ txId: tx.id, ref: inv.reference, amount: `\u20A6${Number(inv.amount).toLocaleString()}.00`, recipient: inv.recipient })}
@@ -220,7 +220,7 @@ export default function DashboardChat() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-3 bg-surface">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 pb-6 space-y-3 bg-surface">
         {messages.map((msg, i) => (
           <div
             key={i}
